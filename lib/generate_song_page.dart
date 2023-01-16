@@ -80,18 +80,19 @@ class _Generate_SongsState extends State<Generate_Songs> {
                           child: Text(_generatedSong),
                         ),
                         actions: <Widget>[
-                          FlatButton(
+                          MaterialButton(
                             child: Text("Copy"),
                             onPressed: () async {
                               await Clipboard.setData(
                                   ClipboardData(text: _generatedSong));
-                              Scaffold.of(context).showSnackBar(SnackBar(
-                                  width: double.infinity,
-                                  content: Text("Copied"),
-                                  duration: Duration(seconds: 2)));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      width: double.infinity,
+                                      content: Text("Copied"),
+                                      duration: Duration(seconds: 2)));
                             },
                           ),
-                          FlatButton(
+                          MaterialButton(
                             child: Text("OK"),
                             onPressed: () {
                               Navigator.of(context).pop();
