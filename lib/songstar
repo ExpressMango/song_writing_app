@@ -1,0 +1,146 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+class Generate_Songs extends StatefulWidget {
+  Generate_Songs({Key? key}) : super(key: key);
+
+  @override
+  State<Generate_Songs> createState() => _Generate_SongsState();
+}
+
+final _controller = TextEditingController();
+String _generatedSong = '';
+final apiKey = "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";
+
+class _Generate_SongsState extends State<Generate_Songs> {
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          title: Text(
+            'Generate Your Song\'s Lyrics Here',
+            style: TextStyle(
+                fontSize: 20, color: Colors.white, fontWeight: FontWeight.w400),
+          ),
+          centerTitle: true,
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                child: Image.asset(
+                  'images/singing.png',
+                  height: 200,
+                ),
+              ),
+              Text(
+                'What\'s Your Song About',
+                style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.black.withOpacity(0.8),
+                    fontWeight: FontWeight.w500),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.all(Radius.circular(15))),
+                  margin: EdgeInsets.symmetric(vertical: 30, horizontal: 10),
+                  width: double.infinity,
+                  child: Form(
+                    child: TextFormField(
+                      decoration: InputDecoration(),
+                      controller: _controller,
+                    ),
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(minimumSize: Size(300, 60)),
+                onPressed: () {
+                  generateSong(_controller.text).then((song) {
+                    setState(() {
+                      _generatedSong = song;
+                    });
+                  });
+                },
+                child: Text(
+                  'Compose',
+                  style: TextStyle(
+                      fontSize: 22,
+                      color: Colors.black54,
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              SingleChildScrollView(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 3, horizontal: 5),
+                  child: Expanded(
+                    child: Container(
+                      margin: EdgeInsets.symmetric(vertical: 5),
+                      color: Colors.grey[100],
+                      width: double.infinity,
+                      height: 820,
+                      child: Text(_generatedSong),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<String> generateSong(String keyword) async {
+    final response = await http.post(
+      Uri.parse(
+        "https://api.openai.com/v1/engines/text-davinci-003/completions",
+      ),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $apiKey"
+      },
+      body: jsonEncode({
+        "prompt": "Verse 1: #compose a verse about " +
+            keyword +
+            "\n" +
+            "Chorus: #compose a chorus about " +
+            keyword +
+            "\n" +
+            "Verse 2: #compose a verse about " +
+            keyword +
+            "\n" +
+            "Bridge: #compose a bridge about " +
+            keyword +
+            "\n" +
+            "Outro: #compose an outro about " +
+            keyword,
+        "max_tokens": 1000,
+        "format": "text"
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      String generatedText = jsonDecode(response.body)['choices'][0]['text'];
+      final song = jsonData["choices"][0]["text"];
+      return song;
+    } else {
+      return 'Oga I No Fit Do That One OOO (Error)';
+    }
+  }
+}
